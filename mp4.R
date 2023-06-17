@@ -28,7 +28,7 @@ library(utils)
 library(dplyr)
 library(zoo)
 
-#------------------------dataset to dataframe-------------------------------------#
+#------------------------Dataset to Dataframe-------------------------------------#
 
 df <- read.csv("Advanced.csv",stringsAsFactors=FALSE)
 df$birth_year <- NULL
@@ -77,14 +77,9 @@ View(df2)
 
 
 
+#--------------------------Trade Prediction-------------------------#
 
-
-#------------------------------DONE-----------------------------------#
-#--------------------------for predicting trade-------------------------#
-#------------------------c=1,pf=2,sf=3,sg=4,pg=5--------------------------#
-
-
-# --------------------------preprocessing-------------------------#
+# --------------------------Preprocessing-------------------------#
 
 df_trade<-df2
 df_trade$seas_id <- NULL
@@ -109,21 +104,16 @@ test_data <- df_trade[-train_index, ]
 View(train_data)
 View(test_data)
 
-
-
 df_com <- subset(df2,pos=="SG")
 df_com<-df_com[,c(12,13,14,15,16,17,21,23)]
 df_com$trade[1]=0
 df_com <- replace(df_com,is.na(df_com),0)
-
 correlation=cor(df_com)
 View(correlation)
 
+#--------------------------Implementation-------------------------------#
 
-
-#--------------------------implementation-------------------------------#
-
-#linear
+#Linear Regression
 x2=glm(trade~ pos + age +tm+ mp + per + ts_percent + trb_percent + ast_percent + stl_percent + blk_percent + tov_percent + usg_percent + ws + bpm,data=train_data,family=binomial(link="logit"))
 new_data <- data.frame(pos = 2, age = 22, tm=1,mp = 2341, per = 23.4, ts_percent = 0.684, trb_percent = 7.2, ast_percent = 28.3, stl_percent = 15.43, blk_percent = 2.2, tov_percent = 18.23, usg_percent = 25.2, ws = 3.2, bpm = -1.8)
 probabilities <- x2 %>% predict(test_data, type = "response")
@@ -131,9 +121,7 @@ predicted_trade <- ifelse(probabilities > 0.5, 1, 0)
 print(predicted_trade)
 mean(predicted_trade == test_data$trade)
 
-
-
-#gam
+#GAM
 g=gam.model <- gam(trade~ pos + age +tm+ mp + per + ts_percent + trb_percent + ast_percent + stl_percent + blk_percent + tov_percent + usg_percent + ws + bpm,data=train_data,family=binomial)
 # Make predictions
 probabilities1 <- gam.model %>% predict(test_data, type = "response")
@@ -141,21 +129,16 @@ predicted_trade <- ifelse(probabilities1 > 0.48, 1, 0)
 print(predicted_trade)
 mean(predicted_trade == test_data$trade)
 
-
-#randomforest
+#Randomforest
 x_r=randomForest(factor(trade)~ pos +tm+ age + per + ts_percent + trb_percent + ast_percent + stl_percent + blk_percent + tov_percent + usg_percent + ws ,data=train_data,ntree = 1000, importance = TRUE)
 new_data <- data.frame(pos = 2,tm=1, age = 22, per = 23.4, ts_percent = 0.684, trb_percent = 7.2, ast_percent = 28.3, stl_percent = 15.43, blk_percent = 2.2, tov_percent = 18.23, usg_percent = 25.2, ws = 3.2)
 predicted_trade <- predict(x_r, newdata = df_trade)
 mean(predicted_trade == test_data$trade)
 
-
 trade<-data.frame(predicted_trade,df_trade$season,df_trade$player_id,df_trade$pos)
 colnames(trade)<-c("trade","season","player_id","pos")
 trade<-subset(trade,season==2022 & trade==1)
 View(trade)
-
-
-
 
 p1 <-readline("enter player id:")
 player1<-as.integer(p1)
@@ -180,7 +163,7 @@ tryCatch(
     rows=nrow(df_pos)
     rows
     
-    #-----------------------------trading for center------------------------------------------------------
+    #-----------------------------Trading for Center----------------------------------------#
     if (position==1){
       n <- c()
       for (i in 1:rows){
@@ -206,11 +189,9 @@ tryCatch(
       }
       length(p2_name)<-5
       cat(paste("possible trade options for",p1_name,"are:\n"),paste(p2_name, collapse = ", "))
-      
-      
     }
     
-    #-----------------------------trading for power forward----------------------------------------
+    #-----------------------------Trading for Power Forward---------------------------------#
     if (position==2){
       n <- c()
       for (i in 1:rows){
@@ -236,10 +217,9 @@ tryCatch(
       }
       length(p2_name)<-5
       cat(paste("possible trade options for",p1_name,"are:\n"),paste(p2_name, collapse = ", "))
-      
     }
     
-    #-----------------------------trading for small forward----------------------------------------
+    #-----------------------------Trading for Small Forward-------------------------------------#
     if (position==3){
       n <- c()
       for (i in 1:rows){
@@ -265,11 +245,9 @@ tryCatch(
       }
       length(p2_name)<-5
       cat(paste("possible trade options for",p1_name,"are:\n"),paste(p2_name, collapse = ", "))
-      
     }
-    
-    
-    #-----------------------------trading for shooting guard--------------------------------------
+
+    #-----------------------------Trading for Shooting Guard----------------------------------#
     if (position==4){
       n <- c()
       for (i in 1:rows){
@@ -294,12 +272,10 @@ tryCatch(
         j<-j+1
       }
       length(p2_name)<-5
-      cat(paste("possible trade options for",p1_name,"are:\n"),paste(p2_name, collapse = ", "))
-      
-      
+      cat(paste("possible trade options for",p1_name,"are:\n"),paste(p2_name, collapse = ", "))   
     }
     
-    #-----------------------------trading for point guard--------------------------------------------
+    #-----------------------------Trading for Point Guard----------------------------------------#
     if (position==5){
       n <- c()
       for (i in 1:rows){
@@ -337,19 +313,9 @@ tryCatch(
 
 
 
+# ------------------------Career Length Prediction---------------------#
 
-
-
-
-
-
-
-# ------------------------------DONE-----------------------------------#
-# ------------------------career length prediction---------------------#
-# -----------------------c=1,pf=2,sf=3,sg=4,pg=5-----------------------#
-
-
-#--------------------------preprocessing-------------------------------#
+#--------------------------Preprocessing-------------------------------#
 
 df_cl <- subset(df2,df2$experience==1)
 df_cl$seas_id <- NULL
@@ -372,10 +338,9 @@ test_data<- df_cl[-train_index, ]
 View(train_data)
 View(test_data)
 
-#--------------------------implementation-------------------------------#
+#--------------------------Implementation-------------------------------#
 
-
-#linear
+#Linear Regression
 x=lm(year~ pos + age + mp + per + ts_percent + trb_percent + ast_percent + stl_percent + blk_percent + tov_percent + usg_percent + ws + bpm,data=train_data)
 new_data <- data.frame(pos = 2, age = 22, mp = 2341, per = 23.4, ts_percent = 0.684, trb_percent = 7.2, ast_percent = 28.3, stl_percent = 15.43, blk_percent = 2.2, tov_percent = 18.23, usg_percent = 25.2, ws = 3.2, bpm = -1.8)
 predicted_year <- predict(x, newdata = test_data)
@@ -385,7 +350,7 @@ predicted_y <- subset(predicted_y,test_data$season==2011)
 View(predicted_y)
 
 
-#randomforest
+#Randomforest
 x=randomForest(year~ pos + age + mp + per + ts_percent + trb_percent + ast_percent + stl_percent + blk_percent + tov_percent + usg_percent + ws + bpm,data=train_data,ntree = 500, importance = TRUE)
 predicted_year <- predict(x, newdata = test_data)
 predicted_y <- data.frame(test_data$player,round(predicted_year),test_data$year,test_data$season)
@@ -393,7 +358,7 @@ predicted_y <- subset(predicted_y,test_data$season==2013)
 colnames(predicted_y) <- c("player name","predicted career length","actual career length","season")
 View(predicted_y)
 
-#svm
+#SVM
 x=e1071::svm(year ~ age + mp + per + ts_percent + trb_percent + ast_percent + stl_percent + blk_percent + tov_percent + usg_percent + ws + bpm,data=train_data,kernal="linear",cost=1,epsilon=0.1)
 predicted_year <- predict(x, newdata = test_data)
 predicted_y <- data.frame(test_data$player,round(predicted_year),test_data$year,test_data$season)
@@ -402,7 +367,7 @@ colnames(predicted_y) <- c("player name","predicted career length","actual caree
 
 View(predicted_y)
 
-#performance metrics
+#Performance Metrics
 d<-test_data$year-predicted_year
 rmse<-sqrt(mean((predicted_year-test_data$year)^2))
 rmse
@@ -413,19 +378,9 @@ R2
 
 
 
+#------------------------Player Selection In Different Teams---------------------#
 
-
-
-
-
-
-
-#----------------------------------DONE-------------------------------------#
-#------------------------player selection in diff teams---------------------#
-#----------------------------A-D=1,A-N=2,A-R=3------------------------------#
-
-
-#--------------------------preprocessing-------------------------------#
+#--------------------------Preprocessing-------------------------------#
 
 df4 <- read.csv("End of Season Teams.csv",stringsAsFactors=FALSE)
 df4 <- df4[df4$type != "All-ABA",]
@@ -467,10 +422,9 @@ test_data<- df_tm[-train_index, ]
 View(train_data)
 View(test_data)
 
+#--------------------------Implementation-------------------------------#
 
-#--------------------------implementation-------------------------------#
-
-#logistic
+#Logistic Regression
 x20=glm(type~ season + pos + mp + per + ts_percent + trb_percent + ast_percent + stl_percent + blk_percent + tov_percent + usg_percent + ws + bpm,data=train_data,family=binomial(link="logit"))
 new_data <- data.frame(season=1986,pos = 2,mp = 2341, per = 23.4, ts_percent = 0.684, trb_percent = 7.2, ast_percent = 28.3, stl_percent = 15.43, blk_percent = 2.2, tov_percent = 18.23, usg_percent = 25.2, ws = 3.2, bpm = -1.8)
 probabilities <- x2 %>% predict(test_data, type = "response")
@@ -478,16 +432,14 @@ predicted_team <- ifelse(probabilities > 0.5, 1, 0)
 print(predicted_trade)
 mean(predicted_trade == test_data$trade)
 
-
-#gam
+#GAM
 g=gam.model <- gam(trade~ pos + age +tm+ mp + per + ts_percent + trb_percent + ast_percent + stl_percent + blk_percent + tov_percent + usg_percent + ws + bpm,data=df2,family=binomial)
 probabilities1 <- gam.model %>% predict(test_data, type = "response")
 predicted_trade <- ifelse(probabilities1 > 0.48, 1, 0)
 print(predicted_trade)
 mean(predicted_trade == test_data$type)
 
-
-#randomforest
+#Randomforest
 x_r=randomForest(factor(type)~ season + pos + mp + per + ts_percent + trb_percent + ast_percent + stl_percent + blk_percent + tov_percent + usg_percent + ws + bpm,data=train_data,ntree = 500, importance = TRUE)
 new_data <- data.frame(season=1986,pos = 2, age = 22,mp = 2341, per = 23.4, ts_percent = 0.684, trb_percent = 7.2, ast_percent = 28.3, stl_percent = 15.43, blk_percent = 2.2, tov_percent = 18.23, usg_percent = 25.2, ws = 3.2, bpm = -1.8)
 predicted_team <- predict(x_r, newdata = test_data)
@@ -502,19 +454,9 @@ mean(predicted_team==test_data$type)
 
 
 
+#----------------------------------Salary Prediction------------------------------------#
 
-
-
-
-
-
-
-#--------------------------------------DONE---------------------------------------------#
-#----------------------------------salary prediction------------------------------------#
-#-----------------------------c=1,pf=2,sf=3,sg=4,pg=5-----------------------------------#
-
-
-#--------------------------preprocessing-------------------------------#
+#--------------------------Preprocessing-------------------------------#
 
 df_1 <- read.csv("Advanced_s.csv")
 View(df_1)
@@ -572,10 +514,9 @@ test_data$year <-NULL
 View(train_data)
 View(test_data)
 
+#--------------------------Implementation-------------------------------#
 
-#--------------------------implementation-------------------------------#
-
-#linear
+#Linear Regression
 model1=lm(salary~ pos + age + mp + per + ts_percent + trb_percent + ast_percent + stl_percent + blk_percent + tov_percent + usg_percent + ws + bpm,data=train_data)
 #new_data <- data.frame(pos = 2, age = 22, mp = 2341, per = 23.4, ts_percent = 0.684, trb_percent = 7.2, ast_percent = 28.3, stl_percent = 15.43, blk_percent = 2.2, tov_percent = 18.23, usg_percent = 25.2, ws = 3.2, bpm = -1.8)
 predicted_sal <- predict(model1, newdata = test_data)
@@ -591,8 +532,7 @@ mae
 R2 = 1-(sum((d)^2)/sum((test_data$salary-mean(test_data$salary))^2))
 R2
 
-
-#randomforest
+#Randomforest
 model2=randomForest(salary~ pos + age + mp + per + ts_percent + trb_percent + ast_(percent + stl_percent + blk_percent + tov_percent + usg_percent + ws + bpm,data=train_data,ntree = 500, importance = TRUE))
 #new_data <- data.frame(pos = 2, age = 22, mp = 2341, per = 23.4, ts_percent = 0.684, trb_percent = 7.2, ast_percent = 28.3, stl_percent = 15.43, blk_percent = 2.2, tov_percent = 18.23, usg_percent = 25.2, ws = 3.2, bpm = -1.8)
 predicted_sal <- predict(model2, newdata = test_data)
@@ -600,7 +540,6 @@ predicted_s=data.frame(test_data$player.x,(2*exp(predicted_sal)),exp(test_data$s
 colnames(predicted_s) <- c("player name","Predicted Salary","Original Salary")
 predicted_s <-  subset(predicted_s,predicted_s$`player name` !="Allen Crabbe")
 View(head(predicted_s,10))
-
 
 d<-test_data$salary-predicted_sal
 rmse<-sqrt(mean((predicted_sal-test_data$salary)^2)/length(test_data))
@@ -612,19 +551,9 @@ R2
 
 
 
-
-
-
-
-
-
-
-#----------------------------------------------DONE-----------------------------------------------------#
-#--------------------------------------- mance analysis--------------------------------------------#
-
+#--------------------------------------- Performance Analysis--------------------------------------------#
 
 #-----------------------------------------preprocessing-----------------------------------------------#
-
 
 #player_id <-readline("enter player id:")
 player_id <- 4219
@@ -654,8 +583,7 @@ choice
 
 #----------------------------------implementation------------------------------------#
 
-
-#function for drawing graphs to analyse a players performance in different positions
+#function for drawing graphs to analyse a player's performance in different positions
 diff_pos <- function() {
   if(no_pos>1){
     df_pg <- subset(df_temp,pos=="PG")
@@ -742,18 +670,11 @@ diff_pla <- function(){
   colnames(df_p2)
   df_comp <- rbind(cbind(df_p1, Player = p1), cbind(df_p2, Player = p2))
   View(df_comp)
-  
-  
-  
   ggplot(df_comp, aes(x = season, y =!!as.name(choice), fill = Player )) +
     geom_bar(stat = "identity",position ="dodge" )  +
     labs(title = paste( "Comparison of ",choice,"of", p1 ,"and", p2 ,"in Different Seasons"), x = "Season", y = choice) +
     theme(plot.title = element_text(face="bold",hjust = 0.5,size=16),legend.text = element_text(size=14),axis.title.x = element_text(size=12),axis.title.y = element_text(size=12))
-  
-  
-  
 }
-
 
 diff_pos()
 diff_seasons()
@@ -761,13 +682,9 @@ diff_pla()
 
 
 
-
-#----------------------------------------------DONE-----------------------------------------------------#
-#------------------------------------team formation and  analysis---------------------------------------#
-
+#------------------------------------Best Team Formation and  Analysis---------------------------------------#
 
 #-----------------------------------------preprocessing-----------------------------------------------#
-
 
 nba_player_stats <- subset(df, df$season =='2023' & df$g>40)
 
@@ -791,9 +708,7 @@ nba_player_stats$score <-
   (nba_player_stats$usg_percent * usage_percent_weight) +
   (nba_player_stats$ws * winshare_weight) +
   (nba_player_stats$bpm * bpm_weight)
-
 View(nba_player_stats)
-
 
 # Filter players for each position
 point_guards <- nba_player_stats %>%
@@ -838,7 +753,6 @@ View(best_team[, c("tm", "player", "pos", "usg_percent", "ws", "bpm","score")])
 cat("\nPresent Teams:\n")
 print(present_teams)
 
-
 # Calculate average statistics for the best team
 best_team_avg <- best_team %>%
   summarise(
@@ -854,7 +768,3 @@ comparison <- data.frame(
 # Print the comparison
 comparison <- comparison[order(-comparison$score),]
 View(comparison)
-
-
-
-
